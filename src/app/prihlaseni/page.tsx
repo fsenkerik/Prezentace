@@ -30,40 +30,49 @@ export default async function Page({
   const params = await searchParams;
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Přihlášení vyučujícího</h1>
+    <main className="mx-auto flex min-h-dvh max-w-[400px] flex-col justify-center gap-5 px-6 py-10">
+      <div>
+        <div className="kicker mb-1.5">Rozdělovník</div>
+        <h2 className="text-[30px]">Přihlášení vyučujícího</h2>
+      </div>
 
-      <form className="space-y-4">
+      <form className="flex flex-col gap-3.5">
         <input type="hidden" name="dal" value={params.dal ?? "/app"} />
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">E-mail</span>
+
+        <div className="field">
+          <label htmlFor="email">E-mail</label>
           <input
+            id="email"
             name="email"
             type="email"
             required
             autoComplete="email"
-            className="min-h-11 w-full rounded-lg border border-border bg-muted px-3"
+            className="input"
+            style={{ minHeight: 44 }}
           />
-        </label>
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">Heslo</span>
+        </div>
+
+        <div className="field">
+          <label htmlFor="password">Heslo</label>
           <input
+            id="password"
             name="password"
             type="password"
             required
             minLength={8}
             autoComplete="current-password"
-            className="min-h-11 w-full rounded-lg border border-border bg-muted px-3"
+            className="input"
+            style={{ minHeight: 44 }}
           />
-        </label>
+        </div>
 
         {params.chyba && (
-          <p role="alert" className="text-sm text-danger">
+          <p role="alert" className="text-[13px]" style={{ color: "var(--color-danger)" }}>
             Přihlášení se nepovedlo. Zkontroluj e-mail a heslo.
           </p>
         )}
         {params.zalozeno && (
-          <p className="text-sm text-muted-foreground">
+          <p className="muted text-[13px]">
             Účet založen. Pokud Supabase vyžaduje potvrzení e-mailu, klikni
             nejdřív na odkaz ve schránce.
           </p>
@@ -71,19 +80,21 @@ export default async function Page({
 
         <button
           formAction={signIn}
-          className="min-h-11 w-full rounded-lg bg-accent font-medium text-accent-foreground"
+          className="btn btn-primary btn-block"
+          style={{ minHeight: 44 }}
         >
           Přihlásit se
         </button>
         <button
           formAction={signUp}
-          className="min-h-11 w-full rounded-lg border border-border"
+          className="btn btn-secondary btn-block"
+          style={{ minHeight: 44 }}
         >
           Založit účet
         </button>
       </form>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="muted text-[12px]">
         Až si založíš svůj účet, vypni v Supabase registraci nových uživatelů
         (Authentication → Sign In / Providers → Allow new users to sign up).
       </p>

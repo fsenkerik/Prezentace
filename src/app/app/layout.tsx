@@ -1,41 +1,32 @@
-import Link from "next/link";
+import { supabaseServer } from "@/lib/supabase/server";
 import { signOut } from "./actions";
+import Nav from "./nav";
 
-const NAV = [
-  { href: "/app", label: "Přehled" },
-  { href: "/app/tridy", label: "Třídy" },
-  { href: "/app/sady", label: "Sady témat" },
-];
-
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
-    <div className="min-h-dvh">
-      <header className="border-b border-border">
-        <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-4 p-4">
-          <Link href="/app" className="font-semibold">
-            Rozdělovník
-          </Link>
-          <div className="flex gap-4">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-          <form action={signOut} className="ml-auto">
-            <button className="text-sm text-muted-foreground hover:text-foreground">
-              Odhlásit
-            </button>
-          </form>
-        </nav>
-      </header>
-      <main className="mx-auto max-w-5xl p-4">{children}</main>
+    <div className="flex min-h-dvh flex-col md:flex-row">
+      <aside
+        className="flex flex-none flex-col gap-1 px-4.5 py-5 md:w-[236px]"
+        style={{ borderRight: "1px solid var(--color-divider)" }}
+      >
+        <div className="nav-brand mb-6 ml-1.5 text-[17px]">Rozdělovník</div>
+        <Nav />
+        <form action={signOut} className="mt-auto pt-6">
+          <div className="muted mb-2 px-3 text-[12px]">{user?.email}</div>
+          <button className="btn btn-ghost" style={{ minHeight: 36 }}>
+            Odhlásit
+          </button>
+        </form>
+      </aside>
+
+      <main className="min-w-0 flex-1 px-6 py-8 md:px-10">{children}</main>
     </div>
   );
 }

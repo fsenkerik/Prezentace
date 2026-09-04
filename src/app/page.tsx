@@ -1,27 +1,31 @@
 import Link from "next/link";
+import { Corners } from "@/components/ui";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold">Rozdělovník prezentací</h1>
-        <p className="text-muted-foreground">
-          Žáci si rozeberou témata v reálném čase. Kdo dřív přijde, ten dřív
-          mele.
+    <main className="mx-auto flex min-h-dvh max-w-[520px] flex-col justify-center gap-6 px-6 py-10">
+      <div>
+        <div className="kicker mb-1.5">Výběr témat v reálném čase</div>
+        <h1 className="text-[46px]">Rozdělovník prezentací</h1>
+        <p className="muted m-0 text-[15px]">
+          Žáci si rozeberou témata systémem kdo dřív přijde. Jakmile si někdo
+          téma vezme, ostatním se okamžitě uzamkne.
         </p>
       </div>
 
-      <div className="space-y-3 rounded-xl border border-border p-4">
-        <h2 className="font-medium">Jsi žák?</h2>
-        <p className="text-sm text-muted-foreground">
+      <div className="card blueprint px-5 py-4.5">
+        <Corners />
+        <div className="card-kicker">Jsi žák?</div>
+        <p className="card-body">
           Otevři odkaz nebo naskenuj QR kód, který ukazuje vyučující. Budeš
-          potřebovat přístupový kód z tabule.
+          potřebovat šestimístný přístupový kód z tabule.
         </p>
       </div>
 
       <Link
         href="/app"
-        className="flex min-h-11 items-center justify-center rounded-lg bg-accent font-medium text-accent-foreground"
+        className="btn btn-primary btn-block"
+        style={{ minHeight: 44 }}
       >
         Vstup pro vyučující
       </Link>

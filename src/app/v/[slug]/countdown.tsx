@@ -33,12 +33,12 @@ export default function Countdown({
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <p
-      className="font-mono text-5xl font-semibold tabular-nums"
+    <div
+      className="mono text-[56px] leading-none tabular-nums"
       aria-live="polite"
     >
       {hours > 0 && `${pad(hours)}:`}
       {pad(minutes)}:{pad(seconds)}
-    </p>
+    </div>
   );
 }

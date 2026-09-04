@@ -10,9 +10,13 @@ import { supabaseServer } from "@/lib/supabase/server";
 export async function createClass(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
+  const raw = Number(formData.get("student_count"));
+  const student_count = Number.isFinite(raw) && raw > 0 ? raw : null;
+
   const supabase = await supabaseServer();
-  await supabase.from("classes").insert({ name });
+  await supabase.from("classes").insert({ name, student_count });
   revalidatePath("/app/tridy");
+  revalidatePath("/app");
 }
 
 export async function deleteClass(formData: FormData) {

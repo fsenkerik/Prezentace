@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
@@ -36,36 +37,91 @@ export default async function Projector({
 
   // QR se vykreslí na serveru jako data URL — na plátně tak nikdy
   // neprobleskne prázdné místo.
-  const qr = await QRCode.toDataURL(link, { margin: 1, width: 720 });
+  const qr = await QRCode.toDataURL(link, {
+    margin: 0,
+    width: 720,
+    color: { dark: "#1d2d3d", light: "#f2f5f8" },
+  });
+
   const set = assignment.topic_sets as unknown as { title: string };
   const cls = assignment.classes as unknown as { name: string };
+  const free = (total ?? 0) - (taken ?? 0);
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-6 text-center">
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-10 px-[6vw] py-8 lg:flex-row lg:gap-20"
+      style={{ background: "var(--color-accent-900)", color: "#f2f5f8" }}
+    >
       <LiveRefresh assignmentId={assignment.id} />
 
-      <div>
-        <p className="text-2xl text-muted-foreground">{cls?.name}</p>
-        <h1 className="text-4xl font-semibold">{set?.title}</h1>
+      <div className="flex-none bg-[#f2f5f8] p-[26px]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={qr}
+          alt={`QR kód na ${link}`}
+          className="size-[min(38vh,420px)]"
+        />
       </div>
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={qr}
-        alt={`QR kód na ${link}`}
-        className="size-[min(46vh,420px)] rounded-xl bg-white p-3"
-      />
+      <div className="min-w-0 flex-1">
+        <div
+          className="text-[clamp(14px,1.6vw,22px)] uppercase tracking-[.2em] opacity-70"
+          style={{ fontFamily: "var(--font-heading)" }}
+        >
+          {cls?.name} · {set?.title}
+        </div>
+        <div
+          className="my-2.5 mb-11 text-[clamp(38px,5.4vw,74px)] leading-none"
+          style={{ fontFamily: "var(--font-heading)" }}
+        >
+          Vyber si téma
+        </div>
 
-      <div className="space-y-1">
-        <p className="text-3xl">{link.replace(/^https?:\/\//, "")}</p>
-        <p className="font-mono text-6xl font-bold tracking-[0.2em]">
+        <div className="mono text-[clamp(20px,3.2vw,46px)] opacity-90">
+          {link.replace(/^https?:\/\//, "")}
+        </div>
+
+        <div
+          className="mt-11 mb-1.5 text-[clamp(13px,1.5vw,20px)] uppercase tracking-[.24em] opacity-60"
+          style={{ fontFamily: "var(--font-heading)" }}
+        >
+          Přístupový kód
+        </div>
+        <div className="mono text-[clamp(48px,7.4vw,104px)] leading-none tracking-[.14em]">
           {assignment.access_code}
-        </p>
+        </div>
+
+        <div
+          className="mt-14 flex items-end gap-5 pt-7"
+          style={{ borderTop: "1px solid rgba(242,245,248,.3)" }}
+        >
+          <div
+            className="text-[clamp(70px,11vw,150px)] leading-[.9] tabular-nums"
+            style={{ fontFamily: "var(--font-heading)" }}
+            aria-live="polite"
+          >
+            {free}
+          </div>
+          <div
+            className="pb-4 text-[clamp(20px,2.5vw,34px)] leading-[1.1]"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            volných témat
+            <br />
+            <span className="text-[.62em] opacity-65">
+              z {total ?? 0} · ubývají živě
+            </span>
+          </div>
+        </div>
       </div>
 
-      <p className="text-5xl font-semibold tabular-nums">
-        zbývá {(total ?? 0) - (taken ?? 0)} z {total ?? 0}
-      </p>
+      <Link
+        href={`/app/vyber/${assignment.id}`}
+        className="absolute right-5 top-5 text-[13px] opacity-50 hover:opacity-100"
+        style={{ color: "#f2f5f8" }}
+      >
+        Zavřít
+      </Link>
     </div>
   );
 }

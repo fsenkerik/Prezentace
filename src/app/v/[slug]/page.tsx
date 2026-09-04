@@ -16,10 +16,11 @@ export default async function Page({
 
   if (!info) {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-3 p-6 text-center">
-        <h1 className="text-xl font-semibold">Výběr nenalezen</h1>
-        <p className="text-muted-foreground">
-          Odkaz je nejspíš překlepnutý, nebo učitel výběr ještě nespustil.
+      <main className="mx-auto flex min-h-dvh max-w-[440px] flex-col justify-center px-6 text-center">
+        <div className="kicker kicker-muted mb-2">Nenalezeno</div>
+        <h3 className="text-[26px]">Tenhle výběr neexistuje</h3>
+        <p className="muted text-[13px]">
+          Odkaz je nejspíš překlepnutý, nebo ho vyučující ještě nespustil.
         </p>
       </main>
     );

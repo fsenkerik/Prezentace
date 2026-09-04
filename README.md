@@ -14,6 +14,7 @@ V Supabase otevři **SQL Editor → New query**, vlož celý obsah
 [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)
 a spusť. Vytvoří tabulky, RLS politiky, realtime publikaci a funkci
 `claim_topic`, která hlídá, aby jedno téma dostal právě jeden žák.
+Pak stejně spusť i [`0002_class_size.sql`](supabase/migrations/0002_class_size.sql).
 
 Pak v **Authentication → Sign In / Providers** nech zatím zapnuté
 zakládání účtů, ať si můžeš vytvořit svůj, a hned potom ho vypni —
@@ -45,6 +46,17 @@ se Supabase.
 4. V detailu výběru nastav čas otevření, promítni **projektorový režim**
    s QR kódem a přepni stav na **Otevřít**
 5. Sleduj živý přehled, případně uvolni téma nebo přiřaď ručně
+
+## Design
+
+Vzhled vychází z návrhu v [`Design/`](Design) — canvas z Claude Design
+včetně jeho design systému „Industry". Tokeny a komponentní třídy jsou
+převzaté do [`src/app/design-system.css`](src/app/design-system.css);
+tenhle soubor je zdroj pravdy pro barvy, typografii i tvar komponent.
+Tailwind se používá jen na rozvržení.
+
+Když budeš chtít vzhled doladit, uprav tokeny nahoře v `design-system.css`,
+ne jednotlivé stránky.
 
 ## Na co si dát pozor
 
