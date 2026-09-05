@@ -52,6 +52,7 @@ export default function StudentBoard({
   const [query, setQuery] = useState("");
   const [onlyFree, setOnlyFree] = useState(false);
   const [openedAt, setOpenedAt] = useState(() => Date.now());
+  const [mountedAt, setMountedAt] = useState<number | null>(null);
 
   const codeRef = useRef("");
 
@@ -77,6 +78,7 @@ export default function StudentBoard({
   );
 
   useEffect(() => {
+    setMountedAt(Date.now());
     setName(localStorage.getItem("rp:name") ?? "");
     const saved = sessionStorage.getItem(`rp:code:${slug}`);
     if (saved) {
@@ -164,42 +166,15 @@ export default function StudentBoard({
     setProblem(null);
   }
 
-  const notOpenYet = info.opens_at
-    ? new Date(info.opens_at).getTime() > openedAt
-    : false;
-
-  // ── 05 · Ještě neotevřeno ────────────────────────────────────────────
-  if (notOpenYet && !board?.my_selection) {
-    return (
-      <main
-        className="mx-auto flex min-h-dvh max-w-[440px] flex-col items-center justify-center px-7 text-center"
-        style={{ background: "var(--color-bg)", color: "var(--color-text)" }}
-      >
-        <div className="kicker mb-2.5">
-          {info.title} · {info.class_name}
-        </div>
-        <h3 className="mb-8 text-[28px]">{info.title}</h3>
-
-        <div className="blueprint mb-6 px-7 py-5">
-          <Corners />
-          <div className="kicker kicker-muted mb-2">Zbývá</div>
-          <Countdown to={info.opens_at!} onDone={() => setOpenedAt(Date.now())} />
-        </div>
-
-        <p className="m-0 mb-1.5 text-[19px]" style={{ fontFamily: "var(--font-heading)" }}>
-          Výběr se otevře v{" "}
-          {new Date(info.opens_at!).toLocaleTimeString("cs-CZ", {
-            hour: "numeric",
-            minute: "2-digit",
-          })}
-        </p>
-        <p className="muted max-w-[32ch] text-[13px]">
-          Nech si stránku otevřenou. Seznam témat se objeví sám, není potřeba
-          nic obnovovat.
-        </p>
-      </main>
-    );
-  }
+  // Až po připojení, aby se serverové a klientské vykreslení nelišila
+  // v čase — jinak by React hlásil rozdíl při hydrataci.
+  const opensAtText =
+    mountedAt && info.opens_at && new Date(info.opens_at).getTime() > mountedAt
+      ? new Date(info.opens_at).toLocaleTimeString("cs-CZ", {
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      : null;
 
   // ── 01 · Vstup do výběru ─────────────────────────────────────────────
   if (!board) {
@@ -286,7 +261,68 @@ export default function StudentBoard({
           >
             Pokračovat
           </button>
+
+          {opensAtText && (
+            <p className="muted text-center text-[12px]">
+              Výběr se otevře v {opensAtText}. Přihlas se teď a počkej na
+              odpočet.
+            </p>
+          )}
         </form>
+      </main>
+    );
+  }
+
+  // ── 05 · Přihlášen, čeká se na start ─────────────────────────────────
+  // Odpočet je záměrně až za bránou: všichni jsou přihlášení dopředu
+  // a v nastavený čas začínají naráz, ne podle toho, kdo dřív dopsal
+  // své jméno.
+  const startsAt = board.opens_at ? new Date(board.opens_at).getTime() : 0;
+
+  if (startsAt > openedAt && !board.my_selection) {
+    return (
+      <main
+        className="mx-auto flex min-h-dvh max-w-[440px] flex-col items-center justify-center px-7 text-center"
+        style={{ background: "var(--color-bg)", color: "var(--color-text)" }}
+      >
+        <div className="kicker mb-2.5">
+          {board.class_name} · {name}
+        </div>
+        <h3 className="mb-8 text-[28px]">{board.title}</h3>
+
+        <div className="blueprint mb-6 px-7 py-5">
+          <Corners />
+          <div className="kicker kicker-muted mb-2">Zbývá</div>
+          <Countdown
+            to={board.opens_at!}
+            onDone={() => {
+              setOpenedAt(Date.now());
+              refresh();
+            }}
+          />
+        </div>
+
+        <p
+          className="m-0 mb-1.5 text-[19px]"
+          style={{ fontFamily: "var(--font-heading)" }}
+        >
+          Výběr se otevře v{" "}
+          {new Date(board.opens_at!).toLocaleTimeString("cs-CZ", {
+            hour: "numeric",
+            minute: "2-digit",
+          })}
+        </p>
+        <p className="muted max-w-[32ch] text-[13px]">
+          Jsi přihlášený a máš místo. Seznam témat se objeví sám, nemusíš nic
+          obnovovat ani nikam klikat.
+        </p>
+
+        <div className="mt-6 flex items-center gap-2">
+          <span className={`livedot ${live ? "" : "is-off"}`} />
+          <span className="muted text-[12px]">
+            {live ? "Spojení připraveno" : "Připojuji…"}
+          </span>
+        </div>
       </main>
     );
   }
@@ -318,11 +354,11 @@ export default function StudentBoard({
 
   return (
     <main
-      className="mx-auto min-h-dvh max-w-[440px] pb-10"
+      className="mx-auto flex h-dvh max-w-[1440px] flex-col overflow-hidden"
       style={{ background: "var(--color-bg)", color: "var(--color-text)" }}
     >
       <div
-        className="sticky top-0 z-10 px-5 pt-4.5 pb-3.5"
+        className="sticky top-0 z-10 px-6 pt-4 pb-3"
         style={{
           background: "var(--color-bg)",
           borderBottom: "1px solid var(--color-divider)",
@@ -336,40 +372,42 @@ export default function StudentBoard({
           <span className="muted ml-auto text-[12px]">{name}</span>
         </div>
 
-        <h4 className="m-0 mb-0.5 text-[22px]">{board.title}</h4>
-        <div
-          className="text-[26px]"
-          style={{ fontFamily: "var(--font-heading)", color: "var(--color-accent)" }}
-          aria-live="polite"
-        >
-          zbývá {free} z {board.topics.length}
-        </div>
-
-        {!mine && !closed && (
-          <div className="mt-3.5 flex gap-2.5">
-            <div className="relative flex-1">
-              <SearchIcon
-                className="pointer-events-none absolute left-2.5 top-3.5 opacity-50"
-              />
-              <input
-                className="input"
-                style={{ minHeight: 44, paddingLeft: 32 }}
-                placeholder="Hledat téma"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-            <button
-              type="button"
-              className="btn btn-secondary whitespace-nowrap"
-              style={{ minHeight: 44 }}
-              aria-pressed={onlyFree}
-              onClick={() => setOnlyFree((v) => !v)}
-            >
-              {onlyFree ? "✓ jen volná" : "jen volná"}
-            </button>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h4 className="m-0 text-[26px]">{board.title}</h4>
+          <div
+            className="text-[26px]"
+            style={{ fontFamily: "var(--font-heading)", color: "var(--color-accent)" }}
+            aria-live="polite"
+          >
+            zbývá {free} z {board.topics.length}
           </div>
-        )}
+
+          {!mine && !closed && (
+            <div className="ml-auto flex gap-2">
+              {/* Na telefonu je celý seznam vidět naráz, takže hledání jen
+                  ubírá výšku. Objeví se, až je na něj místo. */}
+              <div className="relative hidden sm:block">
+                <SearchIcon className="pointer-events-none absolute left-2.5 top-3 opacity-50" />
+                <input
+                  className="input"
+                  style={{ minHeight: 42, paddingLeft: 34, width: 240 }}
+                  placeholder="Hledat téma"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary whitespace-nowrap"
+                style={{ minHeight: 42 }}
+                aria-pressed={onlyFree}
+                onClick={() => setOnlyFree((v) => !v)}
+              >
+                {onlyFree ? "✓ jen volná" : "jen volná"}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 06 · ztráta spojení — nenápadný pruh, žádné modální okno */}
@@ -515,73 +553,51 @@ export default function StudentBoard({
         </div>
       )}
 
-      <div className="flex flex-col gap-4 px-5 py-4.5">
-        {visible.map((topic) => (
-          <div key={topic.id} className="card blueprint relative gap-0 px-4.5 py-4">
-            <Corners />
-
-            {topic.taken ? (
-              <div className="relative">
-                <div className="hatch" />
-                <div style={{ opacity: 0.45 }}>
-                  <div
-                    className="mb-1 flex items-center gap-[7px] text-[12px] tracking-[.1em]"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
-                    <LockIcon size={14} />
-                    <span>TÉMA {numbers.get(topic.id)} · OBSAZENO</span>
-                  </div>
-                  <div
-                    className="strike text-[21px] leading-[1.15] font-semibold"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
-                    {topic.title}
-                  </div>
-                  <p className="m-0 mt-1.5 text-[13px]">{label(topic)}</p>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="topic-num mb-1">TÉMA {numbers.get(topic.id)}</div>
-                <div
-                  className="text-[21px] leading-[1.15] font-semibold"
-                  style={{ fontFamily: "var(--font-heading)" }}
-                >
-                  {topic.title}
-                </div>
-                {topic.description && (
-                  <p className="muted mt-1.5 mb-3.5 text-[13px]">
-                    {topic.description}
-                  </p>
-                )}
-
-                {mine || closed ? (
-                  <button
-                    className="btn btn-secondary btn-block"
-                    style={{ minHeight: 44 }}
-                    disabled
-                  >
-                    {closed ? "Vybírat už nelze" : "Vybírat už nemůžeš"}
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-primary btn-block"
-                    style={{ minHeight: 44, marginTop: 0 }}
-                    onClick={() => setConfirming(topic)}
-                    disabled={busy || !live}
-                  >
-                    {live ? "Vybrat" : "Čekám na spojení…"}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+      <div className="topic-grid flex-1 overflow-y-auto px-6 py-4">
+        {visible.map((topic) =>
+          topic.taken ? (
+            <div key={topic.id} className="topic-tile is-taken">
+              <div className="hatch" />
+              <span className="t-num flex items-center gap-1">
+                <LockIcon size={11} />
+                {numbers.get(topic.id)} · OBSAZENO
+              </span>
+              <span className="t-title">{topic.title}</span>
+              <span className="t-by">{label(topic)}</span>
+            </div>
+          ) : (
+            <button
+              key={topic.id}
+              type="button"
+              className="topic-tile is-free"
+              onClick={() => setConfirming(topic)}
+              disabled={busy || !live || !!mine || closed}
+              title={topic.description ?? topic.title}
+            >
+              <span className="t-num">{numbers.get(topic.id)}</span>
+              <span className="t-title">{topic.title}</span>
+              {topic.description && (
+                <span className="t-desc muted">{topic.description}</span>
+              )}
+              {!mine && !closed && live && (
+                <span className="t-pick">Vybrat</span>
+              )}
+            </button>
+          ),
+        )}
 
         {visible.length === 0 && (
-          <p className="muted py-4 text-center">Nic neodpovídá hledání.</p>
+          <p className="muted col-span-full py-4 text-center">
+            Nic neodpovídá hledání.
+          </p>
         )}
       </div>
+
+      {(mine || closed) && (
+        <p className="muted px-4 pb-4 text-center text-[13px]">
+          {closed ? "Výběr je uzavřený." : "Své téma už máš, vybírat nemůžeš."}
+        </p>
+      )}
 
       {/* 03 · Potvrzovací dialog */}
       {confirming && (

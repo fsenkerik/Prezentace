@@ -366,3 +366,84 @@ textarea.input { min-height: 90px; resize: vertical; }
 
 .progress { height: 6px; background: color-mix(in srgb, var(--color-text) 12%, transparent); }
 .progress > div { height: 100%; background: var(--color-accent); }
+
+/* ── Mřížka témat ──────────────────────────────────────────────────────
+   Vybírá se ve třídě na počítačích, proto cílíme na to, aby se dvacet
+   témat vešlo na monitor bez scrollování — čtyři sloupce po pěti řádcích.
+   Na telefonu zůstává jeden sloupec pod sebou, tam se scrolluje. */
+
+.topic-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 640px)  { .topic-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px } }
+@media (min-width: 1024px) { .topic-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) } }
+
+.topic-tile {
+  position: relative;
+  display: flex; flex-direction: column; gap: 3px;
+  min-height: 70px; padding: 10px 12px;
+  text-align: left; font: inherit; color: inherit;
+  background: transparent; border: 1px solid var(--color-divider);
+}
+.topic-tile.is-free { cursor: pointer; }
+.topic-tile.is-free:hover { border-color: var(--color-accent); }
+.topic-tile.is-free:disabled { cursor: not-allowed; }
+
+.topic-tile .t-num {
+  font-family: var(--font-heading);
+  font-size: 12px; letter-spacing: .1em; color: var(--color-accent);
+}
+.topic-tile .t-title {
+  font-family: var(--font-heading); font-weight: 600;
+  font-size: 17px; line-height: 1.15;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.topic-tile .t-by {
+  font-size: 12px; margin-top: auto;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Obsazená dlaždice si drží všechny čtyři signály z návrhu: ztmavení,
+   přeškrtnutí, zámek i šrafu. */
+.topic-tile.is-taken .t-num,
+.topic-tile.is-taken .t-title,
+.topic-tile.is-taken .t-by { opacity: .45; }
+.topic-tile.is-taken .t-num { color: inherit; }
+.topic-tile.is-taken .t-title { text-decoration: line-through; text-decoration-thickness: 2px; }
+
+/* Popis tématu se vejde v obou rozvrženích — v jednom sloupci na
+   telefonu i ve čtyřech na monitoru. */
+.topic-tile .t-desc {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; margin-top: 2px;
+  font-size: 13px; line-height: 1.35;
+}
+
+/* Vybírá se na počítači, kde je místa dost — dlaždice tedy roste
+   a text s ní, ať je čitelný i z odstupu. */
+@media (min-width: 640px) {
+  .topic-tile { min-height: 112px; padding: 14px 16px; }
+  .topic-tile .t-title { font-size: 19px; }
+  .topic-tile .t-desc  { font-size: 13.5px; }
+}
+
+/* Volná dlaždice je celá klikací, což samo o sobě není vidět —
+   výzva dole to říká nahlas. */
+.topic-tile .t-pick {
+  margin-top: auto; padding-top: 4px;
+  font-family: var(--font-heading); font-weight: 600;
+  font-size: 13px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--color-accent);
+}
+.topic-tile.is-free:hover  { background: color-mix(in srgb, var(--color-accent) 8%, transparent); }
+.topic-tile.is-free:active { background: color-mix(in srgb, var(--color-accent) 16%, transparent); }
+
+/* Dlaždice vyplní zbylou výšku obrazovky, takže se seznam vejde přesně
+   bez ohledu na to, jestli je témat 15 nebo 20. Pod 112 px už řádky
+   neklesnou — místo toho se začne scrollovat. */
+@media (min-width: 640px) {
+  .topic-grid { grid-auto-rows: minmax(112px, 1fr); align-content: stretch; }
+}
