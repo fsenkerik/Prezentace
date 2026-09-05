@@ -9,14 +9,8 @@ import {
   setStatus,
   updateAssignment,
 } from "../../actions";
+import DateTimeField from "./datetime-field";
 import LiveRefresh from "./live-refresh";
-
-function localInput(value: string | null) {
-  if (!value) return "";
-  const d = new Date(value);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 const STATES = [
   { value: "draft", label: "Koncept" },
@@ -133,28 +127,16 @@ export default async function AssignmentDetail({
 
         <form action={updateAssignment} className="flex flex-wrap items-end gap-4">
           <input type="hidden" name="id" value={assignment.id} />
-          <div className="field" style={{ width: 200 }}>
-            <label htmlFor="opens_at">Otevření</label>
-            <input
-              id="opens_at"
-              type="datetime-local"
-              name="opens_at"
-              defaultValue={localInput(assignment.opens_at)}
-              className="input"
-              style={{ minHeight: 40 }}
-            />
-          </div>
-          <div className="field" style={{ width: 200 }}>
-            <label htmlFor="closes_at">Uzávěrka</label>
-            <input
-              id="closes_at"
-              type="datetime-local"
-              name="closes_at"
-              defaultValue={localInput(assignment.closes_at)}
-              className="input"
-              style={{ minHeight: 40 }}
-            />
-          </div>
+          <DateTimeField
+            name="opens_at"
+            label="Otevření"
+            value={assignment.opens_at}
+          />
+          <DateTimeField
+            name="closes_at"
+            label="Uzávěrka"
+            value={assignment.closes_at}
+          />
           <label className="radio mb-1">
             <input
               type="checkbox"
