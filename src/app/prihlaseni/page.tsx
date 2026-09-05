@@ -12,8 +12,15 @@ async function signIn(formData: FormData) {
   redirect(String(formData.get("dal") || "/app"));
 }
 
+/** Zakládání účtů je ve výchozím stavu zavřené. Aplikace je veřejně
+ *  dostupná kvůli žákům, takže by jinak mohl účet vyučujícího založit
+ *  kdokoli, kdo najde adresu. Zapíná se proměnnou ALLOW_SIGNUP=true. */
+const signupOpen = process.env.ALLOW_SIGNUP === "true";
+
 async function signUp(formData: FormData) {
   "use server";
+  if (process.env.ALLOW_SIGNUP !== "true") redirect("/prihlaseni?zavreno=1");
+
   const supabase = await supabaseServer();
   const { error } = await supabase.auth.signUp({
     email: String(formData.get("email")),
@@ -25,7 +32,12 @@ async function signUp(formData: FormData) {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ chyba?: string; zalozeno?: string; dal?: string }>;
+  searchParams: Promise<{
+    chyba?: string;
+    zalozeno?: string;
+    zavreno?: string;
+    dal?: string;
+  }>;
 }) {
   const params = await searchParams;
 
@@ -71,6 +83,11 @@ export default async function Page({
             Přihlášení se nepovedlo. Zkontroluj e-mail a heslo.
           </p>
         )}
+        {params.zavreno && (
+          <p role="alert" className="text-[13px]" style={{ color: "var(--color-danger)" }}>
+            Zakládání nových účtů je vypnuté.
+          </p>
+        )}
         {params.zalozeno && (
           <p className="muted text-[13px]">
             Účet založen. Pokud Supabase vyžaduje potvrzení e-mailu, klikni
@@ -85,19 +102,24 @@ export default async function Page({
         >
           Přihlásit se
         </button>
-        <button
-          formAction={signUp}
-          className="btn btn-secondary btn-block"
-          style={{ minHeight: 44 }}
-        >
-          Založit účet
-        </button>
+
+        {signupOpen && (
+          <button
+            formAction={signUp}
+            className="btn btn-secondary btn-block"
+            style={{ minHeight: 44 }}
+          >
+            Založit účet
+          </button>
+        )}
       </form>
 
-      <p className="muted text-[12px]">
-        Až si založíš svůj účet, vypni v Supabase registraci nových uživatelů
-        (Authentication → Sign In / Providers → Allow new users to sign up).
-      </p>
+      {signupOpen && (
+        <p className="muted text-[12px]">
+          Zakládání účtů je otevřené proměnnou ALLOW_SIGNUP. Až budeš mít účet,
+          proměnnou odeber.
+        </p>
+      )}
     </main>
   );
 }

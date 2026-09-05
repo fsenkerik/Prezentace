@@ -65,3 +65,23 @@ ne jednotlivé stránky.
   a neumí říct, kdo ještě nevybral — jen kdo už vybral.
 - **Z jednoho zařízení proběhne jeden výběr.** Když si dva žáci půjčí
   stejný telefon, druhý dostane hlášku a učitel mu téma přiřadí ručně.
+
+## Nasazení na Vercel
+
+1. **vercel.com → Add New → Project** a naimportuj repozitář `Prezentace`.
+   Next.js Vercel rozpozná sám, nastavení stačí nechat výchozí.
+2. V **Environment Variables** přidej obě hodnoty z `.env.local`:
+   `NEXT_PUBLIC_SUPABASE_URL` a `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+   `ALLOW_SIGNUP` **nepřidávej** — zakládání účtů má zůstat zavřené.
+3. **Deploy.**
+4. V Supabase → **Authentication → URL Configuration** nastav *Site URL*
+   na adresu z Vercelu, ať odkazy v e-mailech nemíří na localhost.
+5. Tamtéž v **Sign In / Providers** vypni *Allow new users to sign up*.
+
+Od té chvíle se každý push do `main` nasadí sám.
+
+### Zakládání účtů
+
+Tlačítko „Založit účet" se ukáže jen když je `ALLOW_SIGNUP=true`.
+Aplikace musí být veřejná kvůli žákům, takže bez téhle pojistky by si
+účet vyučujícího mohl založit kdokoli, kdo najde adresu.
