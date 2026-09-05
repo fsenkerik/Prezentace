@@ -187,10 +187,30 @@ export default function StudentBoard({
         <div className="kicker">{info.class_name}</div>
         <h3 className="mt-1.5 mb-3.5 text-[30px]">{info.title}</h3>
 
-        <div className="mb-5 flex gap-2">
+        <div className="mb-4 flex gap-2">
           <span className="tag tag-accent">{free} volných témat</span>
           <span className="tag tag-outline">{info.topic_count} témat celkem</span>
         </div>
+
+        {opensAtText && (
+          <div
+            className="blueprint mb-5 px-5 py-4 text-center"
+            style={{
+              background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+            }}
+          >
+            <Corners />
+            <div className="kicker kicker-muted mb-1.5">Výběr se otevře za</div>
+            <Countdown
+              to={info.opens_at!}
+              size="md"
+              onDone={() => setOpenedAt(Date.now())}
+            />
+            <p className="muted m-0 mt-2 text-[12px]">
+              Přihlas se už teď. V {opensAtText} začínáte všichni naráz.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={submitGate} className="flex flex-col gap-3.5">
           <div className="field">
@@ -261,13 +281,6 @@ export default function StudentBoard({
           >
             Pokračovat
           </button>
-
-          {opensAtText && (
-            <p className="muted text-center text-[12px]">
-              Výběr se otevře v {opensAtText}. Přihlas se teď a počkej na
-              odpočet.
-            </p>
-          )}
         </form>
       </main>
     );

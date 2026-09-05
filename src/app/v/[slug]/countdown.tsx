@@ -7,9 +7,13 @@ import { useEffect, useState } from "react";
 export default function Countdown({
   to,
   onDone,
+  size = "lg",
 }: {
   to: string;
   onDone: () => void;
+  /** Na bráně stojí vedle formuláře, tam je menší; na čekací
+   *  obrazovce je jediným obsahem, tak může být velký. */
+  size?: "lg" | "md";
 }) {
   const target = new Date(to).getTime();
   const [left, setLeft] = useState(() => target - Date.now());
@@ -34,7 +38,9 @@ export default function Countdown({
 
   return (
     <div
-      className="mono text-[56px] leading-none tabular-nums"
+      className={`mono leading-none tabular-nums ${
+        size === "lg" ? "text-[56px]" : "text-[38px]"
+      }`}
       aria-live="polite"
     >
       {hours > 0 && `${pad(hours)}:`}
