@@ -139,6 +139,16 @@ export async function releaseSelection(formData: FormData) {
   revalidatePath(`/app/vyber/${assignmentId}`);
 }
 
+/** Uvolní všechny výběry v přiřazení naráz — úklid po zkušebním běhu
+ *  nebo restart rozdělování. */
+export async function releaseAll(formData: FormData) {
+  const assignmentId = String(formData.get("assignment_id"));
+  const supabase = await supabaseServer();
+  await supabase.from("selections").delete().eq("assignment_id", assignmentId);
+  revalidatePath(`/app/vyber/${assignmentId}`);
+  revalidatePath("/app");
+}
+
 export async function assignManually(formData: FormData) {
   const assignment_id = String(formData.get("assignment_id"));
   const topic_id = String(formData.get("topic_id"));

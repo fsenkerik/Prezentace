@@ -5,12 +5,14 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { Corners, LockIcon, timeOnly, topicNumber } from "@/components/ui";
 import {
   assignManually,
+  releaseAll,
   releaseSelection,
   setStatus,
   updateAssignment,
 } from "../../actions";
 import DateTimeField from "./datetime-field";
 import LiveRefresh from "./live-refresh";
+import ReleaseAllButton from "./release-all";
 
 const STATES = [
   { value: "draft", label: "Koncept" },
@@ -166,6 +168,10 @@ export default async function AssignmentDetail({
           >
             Export CSV
           </a>
+          <form action={releaseAll}>
+            <input type="hidden" name="assignment_id" value={assignment.id} />
+            <ReleaseAllButton count={done} />
+          </form>
         </div>
       </div>
 
