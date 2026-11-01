@@ -85,3 +85,28 @@ Od té chvíle se každý push do `main` nasadí sám.
 Tlačítko „Založit účet" se ukáže jen když je `ALLOW_SIGNUP=true`.
 Aplikace musí být veřejná kvůli žákům, takže bez téhle pojistky by si
 účet vyučujícího mohl založit kdokoli, kdo najde adresu.
+
+## Udržení projektu v chodu
+
+Bezplatný tarif Supabase uspí projekt po **7 dnech bez provozu** a uspaný
+projekt po čase smaže. Proti tomu běží denní ping:
+
+- [`src/app/api/keep-alive/route.ts`](src/app/api/keep-alive/route.ts) —
+  spočítá řádky v databázi, nic nemění
+- [`vercel.json`](vercel.json) — Vercel Cron ho volá každý den v 6:00 UTC
+
+Záměrně to neběží přes GitHub Actions: naplánovaná workflow se sama vypne
+po 60 dnech nečinnosti repozitáře, tedy přesně tehdy, kdy je potřeba.
+
+Volitelně jde endpoint uzamknout: nastav ve Vercelu proměnnou
+`CRON_SECRET` na libovolný náhodný řetězec. Vercel ji pak posílá v hlavičce
+a cizí volání endpoint odmítne.
+
+**Kontrola:** Vercel → projekt → Settings → Cron Jobs ukazuje poslední běhy.
+Ručně se dá ověřit otevřením `/api/keep-alive` — vrátí JSON s počtem řádků.
+
+### Když se projekt přesto uspí
+
+Obnovíš ho tlačítkem v Supabase dashboardu. Schéma je celé v
+`supabase/migrations`, takže i úplná ztráta projektu znamená založit nový,
+spustit migrace a znovu zadat třídy a témata.
